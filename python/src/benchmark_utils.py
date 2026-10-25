@@ -6,9 +6,9 @@ import numpy as np
 
 # Default Benchmark Settings
 MIN_SIZE = 100
-MAX_SIZE = 10_000_000
-NUM_STEPS = 30
-TRIALS_PER_SIZE = 10 
+MAX_SIZE = 1_000_000
+NUM_STEPS = 50
+TRIALS_PER_SIZE = 5
 SWAP_NOISE_PERCENT = 0.05
 
 
@@ -97,9 +97,7 @@ def benchmark_c_func(c_func, sizes, dist_gen, trials: int = TRIALS_PER_SIZE) -> 
 
             trial_times.append(end_time - start_time)
 
-        median = np.median(trial_times)
-        median_times.append(median)
-        print(f" -> Time spent: {median}")
+        median_times.append(np.median(trial_times))
 
     return np.array(median_times)
 
