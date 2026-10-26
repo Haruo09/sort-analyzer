@@ -8,21 +8,18 @@ Projeto referente à apresentação do algoritmo de ordenação TimSort requisit
 - Seren Iketani
 - Yasmin Sampieri Tonello Cury
 
-## Sumário
-
-1. Como compilar
-2. Como executar os benchmarks
-3. Como executar os testes unitários
-
-### 1 Como compilar
+### 1 Requisitos
 
 Para compilar o projeto, você precisará de:
 
 1. um compilador, de preferência o [Gnu C Compiler (`gcc`)](https://gcc.gnu.org/);
 2. o [`make`](https://www.gnu.org/software/make/);
+3. o [`uv`](https://docs.astral.sh/uv/).
 
 > [!WARNING]
-> Se você está no Linux, todos os pacotes já vêm instalados de fábrica. Caso você use Windows, terá de baixar as ferramentas manualmente. Procure sobre MSYS2 e adicione o `gcc.exe` ao `PATH` do sistema. A seguir, baixe o `choco` para baixar o `make`.
+> Se você está no Linux, tanto o `gcc` quanto o `make` já vêm instalados de fábrica. Caso você use Windows, terá de baixar as ferramentas manualmente. Procure sobre MSYS2 e adicione o `gcc.exe` ao `PATH` do sistema. A seguir, baixe o `choco` para baixar o `make`.
+
+### 2 Setup do ambiente
 
 1. Clone o repositório:
 
@@ -42,44 +39,50 @@ A seguir, compile com o `make`:
 make clean && make
 ```
 
-A biblioteca estará compilada em um arquivo `.so` (ou `.dll`, no Windows) dentro da pasta `./build/lib/` e o processo de compilação gerará um arquivo executável em `./build/bin/`.
+A biblioteca estará compilada em um arquivo `.so` (ou `.dll`, no Windows) dentro da pasta `./build/lib/` e o processo de compilação gerará um arquivo executável de teste em `./build/bin/`.
 
-### 2 Como executar os benchmarks
-
-Os benchmarks estão contidos dentro da pasta `./scripts`, e todos os arquivos de benchmark começam com `benchmark_*` em seus nomes.
-Para executar os testes, primeiro é necessário baixar a ferramenta [`uv`](https://docs.astral.sh/uv/).
-
-A seguir, crie um ambiente virtual executando:
+Após isso, inicie o ambiente o `uv`:
 
 ```bash
-uv venv
-```
-
-Ative o ambiente virtual executando:
-
-```bash
+uv sync
 source .venv/bin/activate
 ```
 
-ou no Windows:
+### 3 Como usar a CLI (`sort-analyzer`)
 
-```bat
-.\.venv\Scripts\activate
-```
+O projeto inclui uma interface de linha de comando (CLI) desenvolvida com Typer e Rich, permitindo executar benchmarks e gerar gráficos interativos e estáticos via Matplotlib.
 
-Instale as dependências:
+#### 3.1 Análise de Algoritmo Único (`analyze`)
 
-```bash
-uv pip install -r pyproject.toml
-```
-
-E, por fim, execute o benchmark desejado:
+Executa testes empíricos de complexidade em três distribuições de dados (aleatória, quase ordenada e inversamente ordenada) e calcula o ajuste de curva (_curve fitting_).
 
 ```bash
-python ./scripts/benchmark_<benchmark_desejado>.py
+uv run sort-analyzer analyze timsort -m 1000 -M 50000 -s 10 -o plots/timsort_analysis.png
 ```
 
-### 3 Como executar os testes unitários
+#### 3.2 Comparação Direta (`compare`)
+
+Realiza um teste _head-to-head_ entre dois algoritmos nas mesmas distribuições de entrada, destacando a diferença percentual de desempenho.
+
+```bash
+uv run sort-analyzer compare timsort quicksort -m 1000 -M 50000 -s 10 -o plots/comparison.png
+```
+
+---
+
+### Tabela de Parâmetros e Opções
+
+| Opção        | Atalho |  Padrão  | Descrição                                                              |
+| :----------- | :----: | :------: | :--------------------------------------------------------------------- |
+| `--min-size` |  `-m`  |  `1000`  | Tamanho inicial do vetor de teste.                                     |
+| `--max-size` |  `-M`  | `100000` | Tamanho máximo do vetor no benchmark.                                  |
+| `--steps`    |  `-s`  |   `10`   | Número de passos logarítmicos entre os tamanhos mínimo e máximo.       |
+| `--output`   |  `-o`  |  `None`  | Caminho do arquivo `.png` onde o gráfico gerado será salvo (opcional). |
+
+### 4 Como executar os testes unitários
+
+> [!WARNING]
+> Devido às atualizações da interface CLI, esta sessão não está mais funcional. Será corrigido futuramente.
 
 Caso não tenha instalado o `uv` ainda, volte na seção anterior e o faça.
 Tendo todas as dependências carregadas e o ambiente virtual ativo, execute:
