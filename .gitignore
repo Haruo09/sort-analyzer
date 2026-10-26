@@ -278,3 +278,21 @@ __marimo__/
 # My changes
 build/
 
+
+# Build & Output Artifacts
+build/
+plots/
+
+# Python
+__pycache__/
+.venv/
+.pytest_cache/
+
+# Build & Output Artifacts
+build/
+plots/
+
+# Python
+__pycache__/
+.venv/
+.pytest_cache/

@@ -1,5 +1,5 @@
-#include "sort_api.h"
-#include "utils.h"
+#include "sort_analyzer/sort_api.h"
+#include "sort_analyzer/utils.h"
 #include <stdio.h>
 
 int main() {

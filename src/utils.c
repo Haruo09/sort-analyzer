@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "sort_analyzer/utils.h"
 #include <stdio.h>
 
 // função apenas para imprimir o array na tela

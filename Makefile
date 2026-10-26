@@ -1,48 +1,48 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -fPIC -Iinclude
+CFLAGS = -Wall -Wextra -O3 -Iinclude -fPIC
+LDFLAGS = -shared
+
+SRC_DIR = src
+APP_DIR = apps
 BUILD_DIR = build
-OBJ_DIR = $(BUILD_DIR)/obj
 LIB_DIR = $(BUILD_DIR)/lib
 BIN_DIR = $(BUILD_DIR)/bin
+OBJ_DIR = $(BUILD_DIR)/obj
 
-# Detect Operating System & Normalize Commands
+LIB_SRCS = $(wildcard $(SRC_DIR)/*.c)
+LIB_OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(LIB_SRCS))
+
+# Handle Windows vs Linux/macOS extensions
 ifeq ($(OS),Windows_NT)
-    TARGET_LIB = $(LIB_DIR)/timsort.dll
-    TARGET_BIN = $(BIN_DIR)/timsort_c_test.exe
-    FIX_PATH = $(subst /,\,$1)
-    MKDIR = if not exist $(call FIX_PATH,$1) mkdir $(call FIX_PATH,$1)
-    RM = if exist $(call FIX_PATH,$(BUILD_DIR)) rmdir /s /q $(call FIX_PATH,$(BUILD_DIR))
+	LIB_NAME = timsort.dll
+	BIN_NAME = timsort_c_test.exe
 else
-    TARGET_LIB = $(LIB_DIR)/libtimsort.so
-    TARGET_BIN = $(BIN_DIR)/timsort_c_test
-    FIX_PATH = $1
-    MKDIR = mkdir -p $1
-    RM = rm -rf $(BUILD_DIR)
+	LIB_NAME = libtimsort.so
+	BIN_NAME = timsort_c_test
 endif
 
-# Find all C sources in src/ (excluding main.c)
-LIB_SRCS = $(filter-out src/main.c, $(wildcard src/*.c))
-LIB_OBJS = $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(LIB_SRCS))
+TARGET_LIB = $(LIB_DIR)/$(LIB_NAME)
+TARGET_BIN = $(BIN_DIR)/$(BIN_NAME)
 
 all: $(TARGET_LIB) $(TARGET_BIN)
 
-# Link dynamic shared library (.so / .dll)
+# 1. Compile the shared library from src/
 $(TARGET_LIB): $(LIB_OBJS) | $(LIB_DIR)
-	$(CC) -shared -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
-# Build C test binary
-$(TARGET_BIN): src/main.c $(LIB_OBJS) | $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+# 2. Compile the C executable runner from apps/
+$(TARGET_BIN): $(APP_DIR)/main.c $(TARGET_LIB) | $(BIN_DIR)
+	$(CC) $(CFLAGS) $< -o $@ -L$(LIB_DIR) -ltimsort -Wl,-rpath,$(LIB_DIR)
 
-# Pattern rule for object files
-$(OBJ_DIR)/%.o: src/%.c | $(OBJ_DIR)
+# Pattern rule for objects
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Create required output directories
-$(BUILD_DIR) $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR):
-	$(call MKDIR,$@)
+# Create necessary directories
+$(LIB_DIR) $(BIN_DIR) $(OBJ_DIR):
+	mkdir -p $@
 
 clean:
-	$(RM)
+	rm -rf $(BUILD_DIR)
 
 .PHONY: all clean
